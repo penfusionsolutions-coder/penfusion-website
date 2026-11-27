@@ -16,6 +16,10 @@ helmet = re.search(r"<helmet>(.*?)</helmet>", src, re.S).group(1).strip()
 body = re.search(r"</helmet>(.*?)</x-dc>", src, re.S).group(1).strip()
 logic = re.search(r"renderVals\(\) \{(.*?)var self = this;", src, re.S).group(1)
 industries_js = re.search(r"var data = (\[.*?\]);", logic, re.S).group(1)
+# Styles that live in the design's script/template, so color changes in the design carry over
+tab_base = re.search(r"var base = '([^']*)';", src).group(1)
+tab_on, tab_off = re.search(r"tabStyle: base \+ \(on\s*\?\s*'([^']*)'\s*:\s*'([^']*)'\)", src).groups()
+check_svg = re.search(r'<sc-for list="\{\{active\.apps\}\}".*?(<svg.*?</svg>)', src, re.S).group(1)
 
 
 def sub_once(pattern, repl, text):
@@ -64,12 +68,12 @@ script = f"""
     if (text != null) e.textContent = text;
     return e;
   }}
-  var check = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F766E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 3px"><path d="M20 6 9 17l-5-5"/></svg>';
+  var check = '{check_svg}';
 
   // Industry tabs
-  var tabBase = 'min-height: 44px; padding: 0 20px; border-radius: 999px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; ';
-  var tabOn = 'border: 1px solid #0F766E; background: #E6FAF6; color: #0B1530;';
-  var tabOff = 'border: 1px solid #C6D1E3; background: #FFFFFF; color: #475569;';
+  var tabBase = '{tab_base}';
+  var tabOn = '{tab_on}';
+  var tabOff = '{tab_off}';
   var tabs = document.getElementById('pf-tabs');
   function showIndustry(i) {{
     var d = industries[i];
